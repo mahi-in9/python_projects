@@ -1,3 +1,4 @@
+# speech.py
 from gtts import gTTS
 import pygame
 import os
@@ -10,6 +11,8 @@ import speech_recognition as sr
 
 pygame.mixer.init()
 recognizer = sr.Recognizer()
+recognizer.energy_threshold = 300
+recognizer.dynamic_energy_threshold = True
 
 def speak(text: str):
     filename = "temp.mp3"
@@ -23,9 +26,10 @@ def speak(text: str):
 
     pygame.mixer.music.unload()
     os.remove(filename)
+
 def listen(duration=5, samplerate=16000):
     try:
-        print("🎤 Listening...")
+        print("Listening...")
         audio = sd.rec(
             int(duration * samplerate),
             samplerate=samplerate,
@@ -37,17 +41,19 @@ def listen(duration=5, samplerate=16000):
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
             with wave.open(f.name, "wb") as wf:
                 wf.setnchannels(1)
-                wf.setsampwidth(2)  # int16 = 2 bytes
+                wf.setsampwidth(2)
                 wf.setframerate(samplerate)
                 wf.writeframes(audio.tobytes())
 
-            with sr.AudioFile(f.name) as source:
-                audio_data = recognizer.record(source)
+        with sr.AudioFile(f.name) as source:
+            audio_data = recognizer.record(source)
 
         text = recognizer.recognize_google(audio_data)
-        print("✅ Heard:", text)
         return text
 
     except Exception as e:
-        print("❌ Listen error:", e)
+        print("Listen error:", e)
         return None
+    finally:
+        if 'f' in locals():
+            os.remove(f.name)
