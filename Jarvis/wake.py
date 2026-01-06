@@ -1,9 +1,7 @@
 # wake.py
 import speech_recognition as sr
-import time
 
-WAKE_WORD = "jarvis"
-
+WAKE_WORD = "jiya"
 recognizer = sr.Recognizer()
 
 def wait_for_wake_word():
@@ -17,20 +15,16 @@ def wait_for_wake_word():
                 print("Listening for wake word...")
                 audio = recognizer.listen(
                     source,
-                    timeout=3,
+                    timeout=5,
                     phrase_time_limit=3
                 )
 
-                text = recognizer.recognize_google(audio)
-                text = text.lower().strip()
-
+                text = recognizer.recognize_google(audio).lower().strip()
                 print("Heard (wake check):", text)
 
-                # STRICT wake word check (no substring bugs)
-                words = text.split()
-                if WAKE_WORD in words:
+                if WAKE_WORD in text.split():
                     print("Wake word detected!")
-                    return True
+                    return
 
             except sr.WaitTimeoutError:
                 continue
@@ -38,4 +32,4 @@ def wait_for_wake_word():
                 continue
             except sr.RequestError as e:
                 print("Wake API error:", e)
-                time.sleep(1)
+                return
